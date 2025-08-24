@@ -8,7 +8,7 @@ import pydirectinput as pdi
 def load_image(path):
     return cv.imread(path, cv.IMREAD_COLOR)
 
-def find_image(needle, threshold=0.8):
+def find_image(needle, threshold=0.7):
     screenshot = cv.cvtColor(np.array(gui.screenshot()), cv.COLOR_RGB2BGR)
     result = cv.matchTemplate(screenshot, needle, cv.TM_CCOEFF_NORMED)
     _, max_val, _, max_loc = cv.minMaxLoc(result)
@@ -30,6 +30,8 @@ mulligan_indicator= load_image('MulliganIndicator.png')
 gameover_indicator= load_image('GameOverIndicator.png')
 confirmation_indicator = load_image('ConfirmationIndicator.png')
 quest_indicator = load_image('QuestIndicator.png')
+pack_indicator = load_image('DailyCardIndicator.png')
+skip_button = load_image('SkipButton.png')
 
 while True:
     found, loc, shape = find_image(title_indicator)
@@ -51,8 +53,27 @@ while True:
 
         if not popup_detected:
             print("No popup after 3 attempts, continuing...")
-
-        break  # exit main loop after handling title + popup
+        for i in range(3):
+            found_popup, loc_popup, shape_popup = find_image(pack_indicator)
+            skip_detected, skip_loc, skip_shape = find_image(skip_button)
+            if found_popup:
+                print("Free pack detected: Clicking redeem")
+                gui.click(960, 768)
+                time.sleep(2)
+                gui.click(960, 768)
+                time.sleep(2)
+                gui.click(960, 768)
+                if skip_detected:
+                    print("Skip button detected: Clicking skip")
+                    click_center(skip_loc, skip_shape)
+                    time.sleep(5)
+                    gui.click(960, 768)
+                    break
+            else:
+                print(f"No free pack detected (attempt {i+1}/3)...")
+                time.sleep(5)
+        
+        break
 
     print("Title screen not found, retrying in 5s...")
     time.sleep(5)
@@ -74,13 +95,9 @@ while True:
     found, loc, shape = find_image(park_indicator)
     if found:
         print("Found the battle button!")
-        time.sleep(2)
+        time.sleep(4)
         pdi.press('f4')  # Press F4 to start the game
-        # gui.keyDown("alt")
-        # time.sleep(4)
-        # gui.keyUp("alt")
-        # gui.click(1780,260)     
-        time.sleep(2)
+        time.sleep(3)
         gui.click(1000,800)     
         break
     print("Battle button not found, retrying in 5s...")
@@ -110,7 +127,8 @@ while True:
             over, _, _ = find_image(gameover_indicator)
             if over:
                 print("Game over detected, exiting...")
-                gui.hotkey('alt', 'f4')
+                gui.press('esc')
+                time.sleep(2)
                 break
             else:
                 gui.click(1731, 500) 
@@ -119,12 +137,18 @@ while True:
     print("Mulligan indicator not found, retrying in 5s...")
     time.sleep(5)
 
+# Claiming rewards
 while True:
     found, loc, shape = find_image(quest_indicator)
     if found:
         print("Found the quest indicator!")
         pdi.press('f3') 
+        time.sleep(5)
         gui.click(1587, 519)
+        time.sleep(2)
+        gui.click(1587, 519)
+        time.sleep(2)
+        gui.click(1587, 753)
         time.sleep(2)
         gui.click(1587, 753)
         time.sleep(2)
