@@ -4,6 +4,9 @@ import pyautogui as gui
 import os
 import time
 import pydirectinput as pdi
+import os
+
+
 
 def load_image(path):
     return cv.imread(path, cv.IMREAD_COLOR)
@@ -21,22 +24,25 @@ def click_center(max_loc, shape, offset=(0,0)):
 
 
 os.startfile('D:/alila/Steam/steamapps/common/ShadowverseWB/ShadowverseWB.exe')
+base_path = os.path.dirname(os.path.abspath(__file__))
 
-title_indicator   = load_image('TitleScreenIndicator.png')
-park_button       = load_image('ParkButton.png')
-park_indicator    = load_image('ParkIndicator.png')
-battle_indicator  = load_image('BattleScreenIndicator.png')
-mulligan_indicator= load_image('MulliganIndicator.png')
-gameover_indicator= load_image('GameOverIndicator.png')
-confirmation_indicator = load_image('ConfirmationIndicator.png')
-quest_indicator = load_image('QuestIndicator.png')
-pack_indicator = load_image('DailyCardIndicator.png')
-skip_button = load_image('SkipButton.png')
+title_indicator   = load_image(os.path.join(base_path, 'TitleScreenIndicator.png'))
+park_button       = load_image(os.path.join(base_path, 'ParkButton.png'))
+park_indicator    = load_image(os.path.join(base_path, 'ParkIndicator.png'))
+battle_indicator  = load_image(os.path.join(base_path, 'BattleScreenIndicator.png'))
+mulligan_indicator= load_image(os.path.join(base_path, 'MulliganIndicator.png'))
+gameover_indicator= load_image(os.path.join(base_path, 'GameOverIndicator.png'))
+confirmation_indicator = load_image(os.path.join(base_path, 'ConfirmationIndicator.png'))
+quest_indicator = load_image(os.path.join(base_path, 'QuestIndicator.png'))
+pack_indicator = load_image(os.path.join(base_path, 'DailyCardIndicator.png'))
+skip_button = load_image(os.path.join(base_path, 'SkipButton.png'))
 
+# Title screen to home
 while True:
     found, loc, shape = find_image(title_indicator)
     if found:
         print("Found the title screen indicator!")
+        time.sleep(3)
         gui.click(1000, 1000)  
 
         popup_detected = False
@@ -44,7 +50,7 @@ while True:
             found_popup, loc_popup, shape_popup = find_image(confirmation_indicator)
             if found_popup:
                 print("Popup detected: Clicking No")
-                gui.click(x=774, y=783)  # adjust coords for "No"
+                gui.click(774, 783)
                 popup_detected = True
                 break
             else:
@@ -63,10 +69,11 @@ while True:
                 gui.click(960, 768)
                 time.sleep(2)
                 gui.click(960, 768)
+                time.sleep(10)
                 if skip_detected:
                     print("Skip button detected: Clicking skip")
                     click_center(skip_loc, skip_shape)
-                    time.sleep(5)
+                    time.sleep(15)
                     gui.click(960, 768)
                     break
             else:
@@ -78,7 +85,7 @@ while True:
     print("Title screen not found, retrying in 5s...")
     time.sleep(5)
 
-
+# Home to park
 while True:
     found, loc, shape = find_image(park_button)
     if found:
@@ -90,24 +97,25 @@ while True:
     print("Park button not found, retrying in 5s...")
     time.sleep(5)
 
-
+# Park to battle
 while True:
     found, loc, shape = find_image(park_indicator)
     if found:
         print("Found the battle button!")
         time.sleep(4)
-        pdi.press('f4')  # Press F4 to start the game
+        pdi.press('f4') 
         time.sleep(3)
         gui.click(1000,800)     
         break
     print("Battle button not found, retrying in 5s...")
     time.sleep(5)
 
-
+# Private match setup
 while True:
     found, loc, shape = find_image(battle_indicator)
     if found:
         print("Found the game indicator!")
+        time.sleep(2)
         gui.click(500, 550)  
         time.sleep(2)
         gui.click(500, 550)   
@@ -119,6 +127,7 @@ while True:
     print("Game indicator not found, retrying in 5s...")
     time.sleep(5)
 
+# Ingame loop
 while True:
     found, loc, shape = find_image(mulligan_indicator)
     if found:
@@ -127,6 +136,7 @@ while True:
             over, _, _ = find_image(gameover_indicator)
             if over:
                 print("Game over detected, exiting...")
+                time.sleep(2)
                 gui.press('esc')
                 time.sleep(2)
                 break
@@ -142,26 +152,35 @@ while True:
     found, loc, shape = find_image(quest_indicator)
     if found:
         print("Found the quest indicator!")
+        time.sleep(3)
         pdi.press('f3') 
         time.sleep(5)
         gui.click(1587, 519)
-        time.sleep(2)
+        time.sleep(4)
         gui.click(1587, 519)
-        time.sleep(2)
+        time.sleep(4)
         gui.click(1587, 753)
-        time.sleep(2)
+        time.sleep(4)
         gui.click(1587, 753)
-        time.sleep(2)
+        time.sleep(4)
         gui.click(500, 900)
-        time.sleep(2)
+        time.sleep(4)
         gui.click(700, 900)
-        time.sleep(2)
+        time.sleep(4)
         gui.click(900, 900)
-        time.sleep(2)
+        time.sleep(4)
         gui.click(1100, 900)
-        time.sleep(2)
+        time.sleep(4)
         gui.click(1300, 900)
+        time.sleep(4)
+        # Exiting the game and shutting down PC
+        pdi.press('alt', 'f4')
+        time.sleep(5)
+        pdi.press('windows', 'd')
         time.sleep(2)
+        pdi.press('alt', 'f4')
+        time.sleep(2)
+        gui.click('985', '490')
         break
     print("Quest indicator not found, retrying in 5s...")
     time.sleep(5)
