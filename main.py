@@ -75,6 +75,8 @@ while True:
                     click_center(skip_loc, skip_shape)
                     time.sleep(15)
                     gui.click(960, 768)
+                    time.sleep(5)
+                    gui.click(960, 768)
                     break
             else:
                 print(f"No free pack detected (attempt {i+1}/3)...")
