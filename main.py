@@ -7,7 +7,6 @@ import pydirectinput as pdi
 import os
 
 
-
 def load_image(path):
     return cv.imread(path, cv.IMREAD_COLOR)
 
@@ -39,53 +38,51 @@ skip_button = load_image(os.path.join(base_path, 'SkipButton.png'))
 
 # Title screen to home
 while True:
-    found, loc, shape = find_image(title_indicator)
-    if found:
-        print("Found the title screen indicator!")
+    found_title, loc_title, shape_title = find_image(title_indicator)
+
+    if not found_title:
+        print("Title screen not found, retrying in 5s...")
+        time.sleep(5)
+        continue
+
+    print("Found title screen!")
+    gui.click(1000, 1000)  
+    time.sleep(3)
+
+    # Handle confirmation popup
+    for i in range(3):
+        found_conf, loc_conf, shape_conf = find_image(confirmation_indicator)
+        if found_conf:
+            print("Popup detected: Clicking No")
+            click_center(loc_conf, shape_conf)
+            break
         time.sleep(3)
-        gui.click(1000, 1000)  
 
-        popup_detected = False
-        for i in range(3):
-            found_popup, loc_popup, shape_popup = find_image(confirmation_indicator)
-            if found_popup:
-                print("Popup detected: Clicking No")
-                gui.click(774, 783)
-                popup_detected = True
-                break
-            else:
-                print(f"No popup detected (attempt {i+1}/3)...")
-                time.sleep(5)
+    # Handle pack or skip
+    for i in range(3):
+        found_pack, loc_pack, shape_pack = find_image(pack_indicator)
+        if found_pack:
+            print("Free pack detected!")
+            gui.click(960, 768)
+            time.sleep(3)
+            gui.click(960, 768)
+            time.sleep(3)
+            gui.click(960, 768)
+            time.sleep(10)
+            continue
+        found_skip, loc_skip, shape_skip = find_image(skip_button)
+        if found_skip:
+            print("Skip button detected: Clicking skip")
+            click_center(loc_skip, shape_skip)
+            time.sleep(10)
+            gui.click(960, 768)
+            time.sleep(5)
+            gui.click(960, 768)
+            break
+        print("No pack or skip detected...")
+        time.sleep(5)
 
-        if not popup_detected:
-            print("No popup after 3 attempts, continuing...")
-        for i in range(3):
-            found_popup, loc_popup, shape_popup = find_image(pack_indicator)
-            skip_detected, skip_loc, skip_shape = find_image(skip_button)
-            if found_popup:
-                print("Free pack detected: Clicking redeem")
-                gui.click(960, 768)
-                time.sleep(2)
-                gui.click(960, 768)
-                time.sleep(2)
-                gui.click(960, 768)
-                time.sleep(10)
-                if skip_detected:
-                    print("Skip button detected: Clicking skip")
-                    click_center(skip_loc, skip_shape)
-                    time.sleep(15)
-                    gui.click(960, 768)
-                    time.sleep(5)
-                    gui.click(960, 768)
-                    break
-            else:
-                print(f"No free pack detected (attempt {i+1}/3)...")
-                time.sleep(5)
-        
-        break
-
-    print("Title screen not found, retrying in 5s...")
-    time.sleep(5)
+    break
 
 # Home to park
 while True:
@@ -176,11 +173,11 @@ while True:
         gui.click(1300, 900)
         time.sleep(4)
         # Exiting the game and shutting down PC
-        pdi.press('alt', 'f4')
+        gui.press('alt', 'f4')
         time.sleep(5)
-        pdi.press('windows', 'd')
+        gui.press('windows', 'd')
         time.sleep(2)
-        pdi.press('alt', 'f4')
+        gui.press('alt', 'f4')
         time.sleep(2)
         gui.click('985', '490')
         break
